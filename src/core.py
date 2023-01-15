@@ -81,13 +81,14 @@ def eucl_dist(v:np.ndarray,w:np.ndarray)->float:
 class DocItem:
     def __init__(self) -> None:
         self._is_hovered = False
+        self.translation = np.array([0,0])
 
     def within_rectangle(self,rect:Rect) -> bool:
         """
         Returns True if this doc item lies within
         the specified rectangle and False otherwise.
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def show_configuration_dialog(self):
         """
@@ -96,13 +97,19 @@ class DocItem:
         atom symbol, charge, num implicit/explicit hydrogens
         et cetera.
         """
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def set_hovered(self,is_hovered:bool) -> None:
         self._is_hovered = is_hovered
 
     def is_hovered(self)->bool:
         return self._is_hovered
+
+    def translate(self, dx:float, dy:float):
+        self.translation = np.array([dx,dy])
+
+    def commit_translate(self):
+        raise NotImplementedError()
 
 
 
@@ -116,18 +123,21 @@ class Atom(DocItem):
         self.symbol = symbol
         self.pos = pos
 
-
     def x(self):
-        return int(self.pos[0])
+        return int(self.pos[0] + self.translation[0])
 
     def y(self):
-        return int(self.pos[1])
+        return int(self.pos[1] + self.translation[1])
 
     def within_rectangle(self, rect: Rect) -> bool:
         return rect.contains(self.pos)
 
     def show_configuration_dialog(self):
         AtomConfigurationDialog(self).show_dialog()
+
+    def commit_translate(self):
+        self.pos += self.translation
+        self.translation = np.array([0.0,0.0])
 
 
 
@@ -144,6 +154,12 @@ class Bond(DocItem):
 
     def center_pos(self) -> np.ndarray:
         return (self.fst.pos + self.snd.pos) / 2
+
+    def translate(self, dx: float, dy: float):
+        pass 
+
+    def commit_translate(self):
+        pass
 
 class Angle:
 

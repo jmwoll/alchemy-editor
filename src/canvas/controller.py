@@ -51,6 +51,7 @@ class CanvasController(QtWidgets.QLabel):
         for item in self.model.document_items():
             item.set_hovered(False)
 
+
     def mouseDoubleClickEvent(self, evt: QtGui.QMouseEvent) -> None:
         if self.current_mode == Mode.ATOM:
             # The user double clicked in atom mode. Therefore,
@@ -91,6 +92,12 @@ class CanvasController(QtWidgets.QLabel):
                     elif self.current_mode == Mode.RECT_SELECT:
                         add_to_selection = 'Shift' in self.keys_pressed
                         self.model.preview_rect_select(dnd.start_x,dnd.start_y,dnd.end_x,dnd.end_y,add_to_selection=add_to_selection,commit_action=False,)
+
+                    elif self.current_mode == Mode.TRANSLATE:
+                        dx = dnd.end_x - dnd.start_x
+                        dy = dnd.end_y - dnd.start_y
+                        #dx,dy = self.transf.backward(dx,dy)
+                        self.model.translate(dx=dx,dy=dy,)
                     else:
                         assert False, f"Cannot handle mode {self.current_mode}"
 
@@ -138,6 +145,8 @@ class CanvasController(QtWidgets.QLabel):
             elif self.current_mode == Mode.RECT_SELECT:
                 add_to_selection = 'Shift' in self.keys_pressed
                 self.model.preview_rect_select(dnd.start_x,dnd.start_y,dnd.end_x,dnd.end_y,add_to_selection=add_to_selection,commit_action=True,)
+            elif self.current_mode == Mode.TRANSLATE:
+                self.model.commit_translate()
             else:
                 assert False, f"Cannot handle mode {self.current_mode}"
 

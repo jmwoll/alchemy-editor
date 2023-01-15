@@ -158,6 +158,19 @@ class CanvasModel:
             # we are still in preview mode
             self.active_bond = active_bond
 
+    
+    def translate(self, dx:float, dy:float,):
+
+        for itm in self.selection:
+            itm:DocItem
+            itm.translate(dx,dy)
+
+    def commit_translate(self):
+        for itm in self.selection:
+            itm:DocItem
+            itm.commit_translate()
+
+
     def preview_rect_select(self,
             x1:float, y1:float,
             x2:float, y2:float,
