@@ -27,6 +27,7 @@ class Mode(enum.Enum):
     DOUBLE_BOND = "double_bond"
     TRIPLE_BOND = "triple_bond"
     RECT_SELECT = "rect_select"
+    TRANSLATE = "translate"
 
 
     def is_bond_mode(self) -> bool:
@@ -64,6 +65,7 @@ class ModeButton(QtWidgets.QPushButton):
 
 
     def paintEvent(self, evt: QtGui.QPaintEvent) -> None:
+        # TODO: refactor as "proper OOP design"
         painter = QtGui.QPainter(self)
         painter.setRenderHint(QtGui.QPainter.RenderHint.Antialiasing)
 
@@ -85,6 +87,7 @@ class ModeButton(QtWidgets.QPushButton):
         w = round(self.width())
         h = round(self.height())
 
+        pad = 2
         if self.mode == Mode.ATOM:
             painter.drawText(
                 w//2-10,h//2-10,20,20,
@@ -92,24 +95,44 @@ class ModeButton(QtWidgets.QPushButton):
                 self.app.canvas.model.current_atom_symbol,
                 )
 
-        pad = 2
-        if self.mode == Mode.SINGLE_BOND:
+        elif self.mode == Mode.SINGLE_BOND:
             painter.drawLine(pad,pad,w-pad,h-pad) 
 
-        if self.mode == Mode.DOUBLE_BOND:
+        elif self.mode == Mode.DOUBLE_BOND:
             painter.drawLine(pad-4,pad,w-pad-4,h-pad) 
             painter.drawLine(pad+4,pad,w-pad+4,h-pad)
 
-        if self.mode == Mode.TRIPLE_BOND:
+        elif self.mode == Mode.TRIPLE_BOND:
             painter.drawLine(pad-5,pad,w-pad-5,h-pad) 
             painter.drawLine(pad,pad,w-pad,h-pad) 
             painter.drawLine(pad+5,pad,w-pad+5,h-pad)
 
-        if self.mode == Mode.RECT_SELECT:
+        elif self.mode == Mode.RECT_SELECT:
             pen.setStyle(Qt.PenStyle.DotLine)
             painter.setPen(pen)
             pad = 4
             painter.drawRect(pad,pad,w-pad*2,h-pad*2)
+
+        elif self.mode == Mode.TRANSLATE:
+            pen.setStyle(Qt.PenStyle.SolidLine)
+            painter.setPen(pen)
+            painter.drawLine(QtCore.QLineF(pad,h/2,w-pad,h/2))
+            painter.drawLine(QtCore.QLineF(w/2,pad,w/2,h-pad))
+            d = 3
+            # arrow tips horizontal
+            painter.drawLine(QtCore.QLineF(pad,h/2,pad+d,h/2+d))
+            painter.drawLine(QtCore.QLineF(pad,h/2,pad+d,h/2-d))
+            painter.drawLine(QtCore.QLineF(w-pad,h/2,w-pad-d,h/2-d))
+            painter.drawLine(QtCore.QLineF(w-pad,h/2,w-pad-d,h/2+d))
+
+            # arrow tips vertical
+            painter.drawLine(QtCore.QLineF(w/2,pad,w/2+d,pad+d,))
+            painter.drawLine(QtCore.QLineF(w/2,pad,w/2-d,pad+d,))
+            painter.drawLine(QtCore.QLineF(w/2,h-pad,w/2-d,h-pad-d,))
+            painter.drawLine(QtCore.QLineF(w/2,h-pad,w/2+d,h-pad-d,))
+        
+        else:
+            assert False, f"Unknown mode {self.mode}"
         
         painter.end()
 
